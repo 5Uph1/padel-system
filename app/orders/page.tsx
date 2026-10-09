@@ -177,7 +177,7 @@ export default async function OrderHistoryPage() {
                       >
                         <span className="text-zinc-700">
                           {item?.name ?? "Item tidak tersedia"} × {line.qty}
-                          {item?.type === "rent" ? " (sewa)" : ""}
+                          {item?.type === "rent" ? ` (${line.qty} jam sewa)` : ""}
                         </span>
                         <span className="font-medium text-zinc-900">
                           {formatRupiah(line.price * line.qty)}

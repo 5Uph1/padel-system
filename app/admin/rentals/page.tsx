@@ -32,7 +32,7 @@ export default async function AdminRentalsPage() {
             <thead className="sticky top-0 bg-zinc-50 text-zinc-600">
               <tr className="border-b border-zinc-200">
                 <th className="px-4 py-3 font-medium">Item</th>
-                <th className="px-4 py-3 font-medium">Harga / hari</th>
+                <th className="px-4 py-3 font-medium">Harga / jam</th>
                 <th className="px-4 py-3 font-medium">Status</th>
               </tr>
             </thead>

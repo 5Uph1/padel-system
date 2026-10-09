@@ -25,7 +25,7 @@ type CartContextValue = {
   items: CartItem[];
   hydrated: boolean;
   persistenceError: string | null;
-  addItem: (item: Omit<CartItem, "qty">) => string | null;
+  addItem: (item: Omit<CartItem, "qty">, qty?: number) => string | null;
   setQuantity: (id: string, qty: number) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
@@ -88,7 +88,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (hydrated) setPersistenceError(writeCart(nextItems));
   }, [hydrated]);
 
-  const addItem = useCallback((item: Omit<CartItem, "qty">) => {
+  const addItem = useCallback((item: Omit<CartItem, "qty">, qty = 1) => {
     const current = items.find((entry) => entry.id === item.id);
     const nextQty = (current?.qty ?? 0) + 1;
 
@@ -97,6 +97,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
     if (item.type === "rent" && item.status !== "available") {
       return "Item sewa ini sudah tidak tersedia.";
+    }
+    if (item.type === "rent" && (!Number.isInteger(qty) || qty < 1 || qty > 24)) {
+      return "Durasi sewa harus antara 1 dan 24 jam.";
     }
     if (item.type === "sale" && nextQty > (item.stock ?? 0)) {
       return "Jumlah melebihi stok yang tersedia.";
@@ -107,7 +110,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ? items.map((entry) =>
             entry.id === item.id ? { ...entry, qty: nextQty } : entry,
           )
-        : [...items, { ...item, qty: 1 }],
+        : [...items, { ...item, qty: item.type === "rent" ? qty : 1 }],
     );
     return null;
   }, [items, saveItems]);
@@ -115,10 +118,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const setQuantity = useCallback((id: string, qty: number) => {
     saveItems(
       items.map((item) => {
-        if (item.id !== id || item.type === "rent") return item;
+        if (item.id !== id) return item;
         return {
           ...item,
-          qty: Math.max(1, Math.min(Math.floor(qty), item.stock ?? 1)),
+          qty: item.type === "rent"
+            ? Math.max(1, Math.min(Math.floor(qty), 24))
+            : Math.max(1, Math.min(Math.floor(qty), item.stock ?? 1)),
         };
       }),
     );

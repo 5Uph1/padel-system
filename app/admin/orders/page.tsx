@@ -124,7 +124,7 @@ export default async function AdminOrdersPage() {
                       {(Array.isArray(line.items)
                         ? line.items[0]?.type
                         : line.items?.type) === "rent"
-                        ? " (sewa)"
+                        ? ` (${line.qty} jam sewa)`
                         : ""}
                     </span>
                     <span>{formatRupiah(line.price * line.qty)}</span>

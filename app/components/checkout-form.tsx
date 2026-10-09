@@ -43,7 +43,7 @@ export function CheckoutForm() {
             >
               <span>
                 {item.name} × {item.qty}
-                {item.type === "rent" ? " (per hari)" : ""}
+                {item.type === "rent" ? ` (${item.qty} jam)` : ""}
               </span>
               <span className="font-medium text-padel-navy">{formatRupiah(item.price * item.qty)}</span>
             </li>

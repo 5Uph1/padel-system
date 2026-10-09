@@ -40,11 +40,11 @@ export function CartPage() {
                 <div className="min-w-48 flex-1">
                   <h2 className="font-semibold text-zinc-950">{item.name}</h2>
                   <p className="mt-1 text-sm text-zinc-600">
-                    {item.type === "rent" ? "Sewa per hari" : "Produk"}
+                    {item.type === "rent" ? `Sewa ${item.qty} jam` : "Produk"}
                   </p>
                   <p className="mt-2 text-sm font-medium text-padel-navy">
                     {formatRupiah(item.price)}
-                    {item.type === "rent" ? " / hari" : ""}
+                    {item.type === "rent" ? " / jam" : ""}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -63,7 +63,17 @@ export function CartPage() {
                       />
                     </label>
                   ) : (
-                    <span className="text-sm text-zinc-600">1 unit</span>
+                    <label className="flex items-center gap-2 text-sm text-zinc-600">
+                      Durasi (jam)
+                      <input
+                        type="number"
+                        min={1}
+                        max={24}
+                        value={item.qty}
+                        onChange={(event) => setQuantity(item.id, Number(event.target.value))}
+                        className="h-10 w-20 rounded-lg border border-zinc-300 px-2 text-zinc-950 focus:border-padel-blue focus:outline-none focus:ring-2 focus:ring-padel-blue/20"
+                      />
+                    </label>
                   )}
                   <button
                     type="button"

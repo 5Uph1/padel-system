@@ -84,7 +84,7 @@ export async function CatalogPage({ type }: CatalogPageProps) {
                   {formatRupiah(item.price)}
                   {isRental && (
                     <span className="ml-1 text-sm font-normal text-zinc-500">
-                      / hari
+                      / jam
                     </span>
                   )}
                 </p>
