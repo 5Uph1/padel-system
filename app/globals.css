@@ -2,25 +2,48 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0a192f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-padel-navy: #0a192f;
+  --color-padel-blue: #0052cc;
+  --color-padel-lime: #ccff00;
+  --color-zinc-50: #f5f8fc;
+  --color-zinc-100: #edf2f8;
+  --color-zinc-200: #dce5f0;
+  --color-zinc-300: #c3d1e2;
+  --color-zinc-400: #8ea2bc;
+  --color-zinc-500: #627993;
+  --color-zinc-600: #455b76;
+  --color-zinc-700: #2d4564;
+  --color-zinc-800: #1a3150;
+  --color-zinc-900: #102542;
+  --color-zinc-950: #0a192f;
+  --color-emerald-50: #eaf2ff;
+  --color-emerald-100: #d6e5ff;
+  --color-emerald-200: #adc9ff;
+  --color-emerald-300: #80a9ff;
+  --color-emerald-400: #5287f0;
+  --color-emerald-500: #0052cc;
+  --color-emerald-600: #0047b3;
+  --color-emerald-700: #003d99;
+  --color-emerald-800: #0052cc;
+  --color-emerald-900: #002b66;
+  --color-emerald-950: #001f4d;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+::selection {
+  background: #ccff00;
+  color: #0a192f;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
