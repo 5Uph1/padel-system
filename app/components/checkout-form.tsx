@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import { checkout } from "@/app/checkout/actions";
 import { useCart } from "./cart-context";
+import { formatRupiah } from "@/lib/format";
+import { Alert, Button, Card, CheckoutSteps, LinkButton } from "./ui";
 
 export function CheckoutForm() {
   const { items, hydrated } = useCart();
@@ -18,16 +19,11 @@ export function CheckoutForm() {
 
   if (items.length === 0) {
     return (
-      <div className="mt-8 rounded-md border border-zinc-200 p-5">
+      <div className="mt-8">
         <p className="text-sm text-zinc-600">
           Keranjang kosong. Tambahkan item sebelum checkout.
         </p>
-        <Link
-          href="/products"
-          className="mt-3 inline-block text-sm font-semibold text-emerald-800"
-        >
-          Lihat produk
-        </Link>
+        <LinkButton href="/products" variant="secondary" className="mt-3">Lihat produk</LinkButton>
       </div>
     );
   }
@@ -35,42 +31,38 @@ export function CheckoutForm() {
   return (
     <form action={formAction} className="mt-8">
       <input type="hidden" name="items" value={serializedItems} />
-      <div className="rounded-lg border border-zinc-200 p-5">
-        <h2 className="font-semibold text-zinc-950">Ringkasan pesanan</h2>
-        <ul className="mt-4 space-y-3">
+      <CheckoutSteps current={2} />
+      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+        <Card className="p-5">
+          <h2 className="font-semibold text-zinc-950">Item pesanan</h2>
+          <ul className="mt-4 divide-y divide-zinc-200">
           {items.map((item) => (
             <li
               key={item.id}
-              className="flex justify-between gap-4 text-sm text-zinc-700"
+              className="flex justify-between gap-4 py-3 text-sm text-zinc-700 first:pt-0 last:pb-0"
             >
               <span>
                 {item.name} × {item.qty}
                 {item.type === "rent" ? " (per hari)" : ""}
               </span>
-              <span>Rp{(item.price * item.qty).toLocaleString("id-ID")}</span>
+              <span className="font-medium text-padel-navy">{formatRupiah(item.price * item.qty)}</span>
             </li>
           ))}
-        </ul>
-        <p className="mt-5 border-t border-zinc-200 pt-4 text-sm text-zinc-600">
+          </ul>
+          <p className="mt-5 border-t border-zinc-200 pt-4 text-sm text-zinc-600">
           Stok produk akan dikurangi dan item sewa akan ditandai disewa setelah
           pesanan berhasil dibuat.
-        </p>
+          </p>
+        </Card>
+        <Card className="h-fit p-5 lg:sticky lg:top-24">
+          <h2 className="font-semibold text-padel-navy">Konfirmasi pesanan</h2>
+          <p className="mt-3 text-sm text-zinc-600">Harga dan ketersediaan akan diperiksa kembali sebelum pesanan dibuat.</p>
+          {error && <div className="mt-4"><Alert variant="error">Checkout gagal: {error}</Alert></div>}
+          <Button type="submit" disabled={pending} className="mt-5 w-full">
+            {pending ? "Memproses..." : "Buat pesanan"}
+          </Button>
+        </Card>
       </div>
-      {error && (
-        <p
-          role="alert"
-          className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-800"
-        >
-          Checkout gagal: {error}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={pending}
-        className="mt-5 w-full rounded-md bg-emerald-800 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
-      >
-        {pending ? "Memproses..." : "Buat pesanan"}
-      </button>
     </form>
   );
 }

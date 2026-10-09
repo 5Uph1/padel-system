@@ -12,11 +12,12 @@ export async function SiteHeader() {
   } = await supabase.auth.getUser();
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 bg-white px-6 py-5">
+    <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white/90 px-4 py-3 shadow-sm backdrop-blur sm:px-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3">
       <Link href="/" className="text-lg font-bold tracking-tight text-padel-navy">
         Padel Shop
       </Link>
-      <nav className="flex flex-wrap items-center gap-4 text-sm sm:gap-6">
+      <nav className="flex w-full flex-wrap items-center gap-2 text-sm sm:w-auto sm:gap-4">
         <Link href="/products" className="font-medium text-zinc-700 hover:text-padel-blue">
           Produk
         </Link>
@@ -56,6 +57,7 @@ export async function SiteHeader() {
           </Link>
         )}
       </nav>
+      </div>
     </header>
   );
 }

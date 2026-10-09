@@ -1,13 +1,13 @@
-import Link from "next/link";
 import { SiteHeader } from "@/app/components/site-header";
+import { LinkButton } from "@/app/components/ui";
 
 export const instant = false;
 
 export default function Home() {
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-5 py-5 sm:px-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-5 sm:px-8">
       <SiteHeader />
-      <section className="relative flex flex-1 flex-col justify-center overflow-hidden bg-padel-navy px-7 py-16 text-white sm:px-14 sm:py-24">
+      <section className="relative flex flex-col justify-center overflow-hidden rounded-2xl bg-padel-navy px-7 py-16 text-white shadow-sm sm:px-14 sm:py-24">
         <div className="relative z-10 max-w-3xl">
           <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-padel-lime">
             <span className="h-2 w-2 rounded-full bg-padel-lime" />
@@ -21,41 +21,25 @@ export default function Home() {
             berikutnya.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
-          <Link
-            href="/products"
-              className="rounded-full bg-padel-lime px-6 py-3 text-sm font-bold text-padel-navy hover:bg-lime-300"
-          >
-            Lihat produk
-          </Link>
-          <Link
-            href="/rentals"
-              className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10"
-          >
-            Sewa raket
-          </Link>
-          <Link
-            href="/rentals/courts"
-            className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10"
-          >
-            Sewa lapangan
-          </Link>
-        </div>
-        </div>
-        <div className="mt-14 grid max-w-2xl grid-cols-2 gap-3 sm:mt-20">
-          <div className="rounded-xl border border-white/15 bg-white/5 p-4">
-            <p className="text-sm font-semibold text-white">Beli perlengkapan</p>
-            <p className="mt-1 text-xs text-blue-100">Pilihan gear untuk permainanmu</p>
-          </div>
-          <div className="rounded-xl border border-white/15 bg-white/5 p-4">
-            <p className="text-sm font-semibold text-white">Sewa dengan mudah</p>
-            <p className="mt-1 text-xs text-blue-100">Cek ketersediaan raket</p>
+            <LinkButton href="/products" variant="secondary" className="border-padel-lime bg-padel-lime font-bold text-padel-navy hover:bg-lime-300">Lihat produk</LinkButton>
+            <LinkButton href="/rentals" variant="secondary" className="border-white/30 bg-transparent text-white hover:bg-white/10">Sewa raket</LinkButton>
+            <LinkButton href="/rentals/courts" variant="secondary" className="border-white/30 bg-transparent text-white hover:bg-white/10">Sewa lapangan</LinkButton>
           </div>
         </div>
       </section>
-      <footer className="flex flex-wrap items-center justify-between gap-3 rounded-b-2xl border border-t-0 border-zinc-200 bg-white px-6 py-5 text-sm text-zinc-500 sm:px-8">
-        <span>Padel Shop</span>
-        <span>Perlengkapan tepat. Permainan hebat.</span>
-      </footer>
+      <section className="grid gap-4 py-8 md:grid-cols-3">
+        {[
+          { title: "Produk", description: "Raket, bola, dan perlengkapan untuk permainanmu.", href: "/products", action: "Jelajahi produk" },
+          { title: "Sewa Raket", description: "Coba raket pilihan untuk sesi berikutnya.", href: "/rentals", action: "Lihat raket sewaan" },
+          { title: "Sewa Lapangan", description: "Pilih lapangan dan jadwal bermain yang tersedia.", href: "/rentals/courts", action: "Pilih jadwal" },
+        ].map((feature) => (
+          <article key={feature.title} className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-padel-navy">{feature.title}</h2>
+            <p className="mt-2 min-h-12 text-sm leading-6 text-zinc-600">{feature.description}</p>
+            <LinkButton href={feature.href} variant="secondary" className="mt-4">{feature.action}</LinkButton>
+          </article>
+        ))}
+      </section>
     </main>
   );
 }

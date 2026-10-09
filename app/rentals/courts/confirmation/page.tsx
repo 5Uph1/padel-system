@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { SiteHeader } from "@/app/components/site-header";
 import { createClient } from "@/utils/supabase/server";
+import { formatRupiah, formatTanggal } from "@/lib/format";
+import { Badge, Card, LinkButton, PageHeader } from "@/app/components/ui";
 
 type Booking = {
   id: string;
@@ -38,25 +39,14 @@ export default async function CourtBookingConfirmationPage({
   const court = Array.isArray(booking.courts)
     ? booking.courts[0]
     : booking.courts;
-  const date = new Intl.DateTimeFormat("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(`${booking.booking_date}T00:00:00Z`));
+  const date = formatTanggal(`${booking.booking_date}T00:00:00Z`, "long");
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-8 sm:px-8">
       <SiteHeader />
       <section className="mx-auto max-w-xl py-12">
-        <p className="text-sm font-semibold text-padel-blue">
-          Pembayaran simulasi berhasil
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-padel-navy">
-          Lapangan berhasil dibooking
-        </h1>
-        <div className="mt-7 rounded-2xl border border-zinc-200 bg-white p-6">
+        <PageHeader eyebrow="Pembayaran simulasi berhasil" title="Lapangan berhasil dibooking" />
+        <Card className="p-6">
           <dl className="space-y-4 text-sm">
             <div>
               <dt className="text-zinc-500">Lapangan</dt>
@@ -77,24 +67,15 @@ export default async function CourtBookingConfirmationPage({
             <div>
               <dt className="text-zinc-500">Total</dt>
               <dd className="mt-1 font-semibold text-padel-navy">
-                Rp{Number(booking.price).toLocaleString("id-ID")}
+                {formatRupiah(booking.price)}
               </dd>
             </div>
           </dl>
-        </div>
+          <div className="mt-4"><Badge variant="success">Dikonfirmasi</Badge></div>
+        </Card>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link
-            href="/rentals/courts"
-            className="rounded-full bg-padel-blue px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            Lihat jadwal
-          </Link>
-          <Link
-            href="/orders"
-            className="rounded-full border border-zinc-300 px-5 py-3 text-sm font-semibold text-padel-navy"
-          >
-            Pesanan saya
-          </Link>
+          <LinkButton href="/rentals/courts">Lihat jadwal</LinkButton>
+          <LinkButton href="/orders" variant="secondary">Pesanan saya</LinkButton>
         </div>
       </section>
     </main>

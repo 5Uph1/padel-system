@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { formatRupiah } from "@/lib/format";
 
 type StockItem = {
   id: string;
@@ -7,11 +8,6 @@ type StockItem = {
   stock: number;
 };
 
-const priceFormatter = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
 
 export const instant = false;
 
@@ -49,7 +45,7 @@ export default async function AdminStockPage() {
                 <tr key={item.id}>
                   <td className="px-4 py-3 font-medium text-zinc-950">{item.name}</td>
                   <td className="px-4 py-3 text-zinc-700">
-                    {priceFormatter.format(item.price)}
+                    {formatRupiah(item.price)}
                   </td>
                   <td className="px-4 py-3 text-zinc-700">{item.stock}</td>
                 </tr>

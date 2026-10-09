@@ -3,6 +3,8 @@ import { connection } from "next/server";
 import { SiteHeader } from "@/app/components/site-header";
 import { createClient } from "@/utils/supabase/server";
 import { bookCourt } from "./actions";
+import { formatRupiah, formatTanggal } from "@/lib/format";
+import { Alert, Badge, EmptyState, PageHeader } from "@/app/components/ui";
 
 type Court = {
   id: string;
@@ -30,23 +32,12 @@ function jakartaDateString(date: Date) {
 }
 
 function formatDate(date: string) {
-  return new Intl.DateTimeFormat("id-ID", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-  }).format(new Date(`${date}T00:00:00Z`));
+  return formatTanggal(`${date}T00:00:00Z`, "short");
 }
 
 function formatTime(time: string) {
   return time.slice(0, 5);
 }
-
-const priceFormatter = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
 
 const bookingErrors: Record<string, string> = {
   invalid: "Pilihan jadwal tidak valid.",
@@ -128,51 +119,27 @@ export default async function CourtBookingPage({
     <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8 sm:px-8">
       <SiteHeader />
       <section className="py-10">
-        <p className="text-sm font-semibold text-padel-blue">
-          Pesan lapangan
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-padel-navy sm:text-4xl">
-          Pilih jadwal bermain
-        </h1>
-        <p className="mt-3 max-w-2xl text-zinc-600">
-          Pilih lapangan dan slot 1 jam. Booking dikonfirmasi melalui pembayaran
-          simulasi dan jadwal yang sudah dibayar tidak dapat dipilih pengguna lain.
-        </p>
+        <PageHeader eyebrow="Pesan lapangan" title="Pilih jadwal bermain" description="Pilih lapangan dan slot 1 jam. Booking dikonfirmasi melalui pembayaran simulasi." />
       </section>
 
       {errorMessage && (
-        <p
-          role="alert"
-          className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          {errorMessage}
-        </p>
+        <div className="mb-6"><Alert variant="error">{errorMessage}</Alert></div>
       )}
 
       {courtError || settingsError || bookingError ? (
-        <p
-          role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
+        <Alert variant="error">
           Jadwal lapangan gagal dimuat:{" "}
           {[courtError, settingsError, bookingError]
             .filter((error) => error !== null)
             .map((error) => error.message)
             .join(" ")}
-        </p>
+        </Alert>
       ) : courts.length === 0 ? (
-        <div className="rounded-xl border border-zinc-200 bg-white p-6">
-          <p className="font-medium text-padel-navy">
-            Belum ada lapangan yang tersedia.
-          </p>
-          <p className="mt-2 text-sm text-zinc-600">
-            Silakan kembali lagi nanti.
-          </p>
-        </div>
+        <EmptyState title="Belum ada lapangan yang tersedia." description="Silakan kembali lagi nanti." />
       ) : !settings ? (
-        <p role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
+        <Alert variant="error">
           Pengaturan jam operasional belum tersedia.
-        </p>
+        </Alert>
       ) : (
         <>
           <div className="flex flex-wrap gap-2" aria-label="Pilih tanggal">
@@ -203,7 +170,7 @@ export default async function CourtBookingPage({
                     <Link
                       href={`/rentals/courts?date=${selectedDate}&court=${court.id}`}
                       aria-current={court.id === selectedCourtId ? "true" : undefined}
-                      className={`block rounded-xl border p-4 ${
+                      className={`block rounded-xl border p-4 shadow-sm ${
                         court.id === selectedCourtId
                           ? "border-padel-blue bg-blue-50"
                           : "border-zinc-200 bg-white hover:border-padel-blue"
@@ -213,7 +180,7 @@ export default async function CourtBookingPage({
                         {court.name}
                       </span>
                       <span className="mt-1 block text-sm text-zinc-600">
-                        {priceFormatter.format(court.price_per_hour)} / jam
+                        {formatRupiah(court.price_per_hour)} / jam
                       </span>
                     </Link>
                   </li>
@@ -234,7 +201,7 @@ export default async function CourtBookingPage({
                     </p>
                   </div>
                   <p className="text-sm font-semibold text-padel-blue">
-                    {priceFormatter.format(selectedCourt.price_per_hour)} / jam
+                    {formatRupiah(selectedCourt.price_per_hour)} / jam
                   </p>
                 </div>
                 {slots.length === 0 ? (
@@ -250,7 +217,7 @@ export default async function CourtBookingPage({
                       return (
                         <li
                           key={slot}
-                          className={`rounded-xl border p-4 ${
+                          className={`rounded-xl border p-4 shadow-sm ${
                             isBooked
                               ? "border-zinc-200 bg-zinc-100"
                               : "border-zinc-200 bg-white"
@@ -260,15 +227,9 @@ export default async function CourtBookingPage({
                             <span className="font-semibold text-padel-navy">
                               {slot}–{String(Number(slot.slice(0, 2)) + 1).padStart(2, "0")}:00
                             </span>
-                            <span
-                              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                isBooked
-                                  ? "bg-zinc-200 text-zinc-600"
-                                  : "bg-lime-100 text-padel-navy"
-                              }`}
-                            >
+                            <Badge variant={isBooked ? "neutral" : "success"}>
                               {isBooked ? "Sudah dibooking" : "Kosong"}
-                            </span>
+                            </Badge>
                           </div>
                           {!isBooked &&
                             (userData.user ? (

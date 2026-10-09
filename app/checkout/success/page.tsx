@@ -1,9 +1,10 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CartClearOnMount } from "@/app/components/cart-clear-on-mount";
 import { PayOrderForm } from "@/app/components/pay-order-form";
 import { SiteHeader } from "@/app/components/site-header";
 import { createClient } from "@/utils/supabase/server";
+import { formatRupiah } from "@/lib/format";
+import { Alert, Badge, Card, CheckoutSteps, LinkButton, PageHeader } from "@/app/components/ui";
 
 export const instant = false;
 
@@ -31,38 +32,27 @@ export default async function CheckoutSuccessPage({
   if (error || !order) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16 sm:px-8">
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-8">
       <CartClearOnMount />
       <SiteHeader />
-      <h1 className="mt-8 text-3xl font-semibold tracking-tight text-zinc-950">
-        {order.status === "paid" ? "Pembayaran berhasil" : "Pesanan dibuat"}
-      </h1>
-      <p className="mt-3 text-zinc-600">
-        Nomor pesanan: <span className="font-medium text-zinc-900">{order.id}</span>
-      </p>
-      <p className="mt-2 text-lg font-semibold text-emerald-900">
-        Total: Rp{Number(order.total).toLocaleString("id-ID")}
-      </p>
-      <p className="mt-2 text-sm text-zinc-600">
-        Status: {order.status === "paid" ? "Dibayar" : "Menunggu pembayaran"}
-      </p>
+      <section className="py-8">
+      <CheckoutSteps current={3} />
+      <PageHeader title={order.status === "paid" ? "Pembayaran berhasil" : "Pesanan dibuat"} description="Ringkasan pesanan dan status pembayaran." />
+      <Card className="p-6">
+        <p className="text-sm text-zinc-600">Nomor pesanan</p>
+        <p className="mt-1 break-all font-medium text-padel-navy">{order.id}</p>
+        <p className="mt-5 text-sm text-zinc-600">Total</p>
+        <p className="mt-1 text-xl font-semibold text-padel-navy">{formatRupiah(Number(order.total))}</p>
+        <div className="mt-4"><Badge variant={order.status === "paid" ? "success" : "warning"}>{order.status === "paid" ? "Dibayar" : "Menunggu pembayaran"}</Badge></div>
+      </Card>
       {params.error && order.status === "pending" && (
-        <p
-          role="alert"
-          className="mt-5 rounded-md bg-red-50 p-3 text-sm text-red-800"
-        >
-          Pembayaran simulasi gagal. Silakan coba lagi.
-        </p>
+        <div className="mt-5"><Alert variant="error">Pembayaran simulasi gagal. Silakan coba lagi.</Alert></div>
       )}
       {order.status === "pending" && (
         <PayOrderForm orderId={order.id} />
       )}
-      <Link
-        href="/products"
-        className="mt-6 inline-block text-sm font-semibold text-emerald-800"
-      >
-        Kembali belanja
-      </Link>
+      <LinkButton href="/products" variant="secondary" className="mt-6">Kembali belanja</LinkButton>
+      </section>
     </main>
   );
 }

@@ -2,18 +2,19 @@
 
 import { useFormStatus } from "react-dom";
 import { payOrder } from "@/app/checkout/actions";
+import { Button } from "./ui";
 
 function PayButton() {
   const { pending } = useFormStatus();
 
   return (
-    <button
+    <Button
       type="submit"
       disabled={pending}
-      className="mt-8 w-full rounded-md bg-emerald-800 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+      className="mt-6 w-full"
     >
       {pending ? "Memproses..." : "Bayar"}
-    </button>
+    </Button>
   );
 }
 

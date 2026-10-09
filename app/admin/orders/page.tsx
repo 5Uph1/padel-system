@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { formatRupiah, formatTanggal } from "@/lib/format";
 
 type Order = {
   id: string;
@@ -22,18 +23,6 @@ type OrderLine = {
     | { name: string; type: "sale" | "rent" }[]
     | null;
 };
-
-const priceFormatter = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
-
-const dateFormatter = new Intl.DateTimeFormat("id-ID", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Jakarta",
-});
 
 export const instant = false;
 
@@ -104,12 +93,12 @@ export default async function AdminOrdersPage() {
                     ID pesanan: {order.id}
                   </p>
                   <p className="mt-1 text-sm text-zinc-600">
-                    {dateFormatter.format(new Date(order.created_at))}
+                    {formatTanggal(order.created_at, "datetime")}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-emerald-900">
-                    {priceFormatter.format(order.total)}
+                    {formatRupiah(order.total)}
                   </p>
                   <span
                     className={`mt-2 inline-block rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -139,7 +128,7 @@ export default async function AdminOrdersPage() {
                         ? " (sewa)"
                         : ""}
                     </span>
-                    <span>{priceFormatter.format(line.price * line.qty)}</span>
+                    <span>{formatRupiah(line.price * line.qty)}</span>
                   </li>
                 ))}
                 {(linesByOrderId.get(order.id) ?? []).length === 0 && (

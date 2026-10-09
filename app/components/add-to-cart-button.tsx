@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useCart, type CartItem } from "./cart-context";
+import { Button, LinkButton } from "./ui";
 
 type AddToCartButtonProps = {
   item: Omit<CartItem, "qty">;
@@ -30,14 +30,11 @@ export function AddToCartButton({
   return (
     <div className="space-y-2">
       {!authenticated ? (
-        <Link
-          href="/login"
-          className="block w-full rounded-md bg-padel-blue px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-700"
-        >
+        <LinkButton href="/login" className="w-full">
           Masuk untuk tambah ke keranjang
-        </Link>
+        </LinkButton>
       ) : (
-      <button
+      <Button
         type="button"
         onClick={handleAdd}
         disabled={
@@ -46,7 +43,7 @@ export function AddToCartButton({
           atStockLimit ||
           (item.type === "rent" && inCart)
         }
-        className="w-full rounded-md bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-600"
+        className="w-full"
       >
         {!hydrated
           ? "Memuat..."
@@ -55,7 +52,7 @@ export function AddToCartButton({
           : atStockLimit || (item.type === "rent" && inCart)
             ? "Sudah di keranjang"
             : "Tambah ke keranjang"}
-      </button>
+      </Button>
       )}
       {message && (
         <p aria-live="polite" className="text-xs text-zinc-600">

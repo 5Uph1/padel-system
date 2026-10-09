@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/app/components/site-header";
 import { createClient } from "@/utils/supabase/server";
+import { formatRupiah, formatTanggal } from "@/lib/format";
+import { Alert, Badge, Card, EmptyState, LinkButton, PageHeader } from "@/app/components/ui";
 
 type Order = {
   id: string;
@@ -29,18 +30,6 @@ type CourtBooking = {
   status: "booked" | "cancelled";
   courts: { name: string } | { name: string }[] | null;
 };
-
-const priceFormatter = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
-
-const dateFormatter = new Intl.DateTimeFormat("id-ID", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Jakarta",
-});
 
 export const instant = false;
 
@@ -73,12 +62,7 @@ export default async function OrderHistoryPage() {
     return (
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10 sm:px-8">
         <SiteHeader />
-        <p
-          role="alert"
-          className="mt-8 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          Riwayat pesanan gagal dimuat: {orderError.message}
-        </p>
+        <div className="mt-8"><Alert variant="error">Riwayat pesanan gagal dimuat: {orderError.message}</Alert></div>
       </main>
     );
   }
@@ -104,23 +88,10 @@ export default async function OrderHistoryPage() {
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10 sm:px-8">
       <SiteHeader />
-      <section className="py-10">
-        <p className="text-sm font-medium text-emerald-800">Akun</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-          Pesanan saya
-        </h1>
-        <p className="mt-3 text-zinc-600">
-          Riwayat pembelian dan penyewaan perlengkapan padel.
-        </p>
-      </section>
+      <section className="py-10"><PageHeader eyebrow="Akun" title="Pesanan saya" description="Riwayat pembelian dan penyewaan perlengkapan padel." /></section>
 
       {bookingError && (
-        <p
-          role="alert"
-          className="mb-5 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          Riwayat booking lapangan gagal dimuat: {bookingError.message}
-        </p>
+        <div className="mb-5"><Alert variant="error">Riwayat booking lapangan gagal dimuat: {bookingError.message}</Alert></div>
       )}
 
       {bookings.length > 0 && (
@@ -133,18 +104,12 @@ export default async function OrderHistoryPage() {
               const court = Array.isArray(booking.courts)
                 ? booking.courts[0]
                 : booking.courts;
-              const bookingDate = new Intl.DateTimeFormat("id-ID", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                timeZone: "UTC",
-              }).format(new Date(`${booking.booking_date}T00:00:00Z`));
+              const bookingDate = formatTanggal(`${booking.booking_date}T00:00:00Z`, "long");
 
               return (
                 <li
                   key={booking.id}
-                  className="rounded-lg border border-zinc-200 bg-white p-5 sm:p-6"
+                  className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -157,18 +122,10 @@ export default async function OrderHistoryPage() {
                         {booking.end_time.slice(0, 5)}
                       </p>
                     </div>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        booking.status === "booked"
-                          ? "bg-lime-100 text-padel-navy"
-                          : "bg-zinc-100 text-zinc-600"
-                      }`}
-                    >
-                      {booking.status === "booked" ? "Dibooking" : "Dibatalkan"}
-                    </span>
+                    <Badge variant={booking.status === "booked" ? "success" : "neutral"}>{booking.status === "booked" ? "Dibooking" : "Dibatalkan"}</Badge>
                   </div>
                   <p className="mt-4 border-t border-zinc-200 pt-4 text-sm font-semibold text-padel-navy">
-                    Total: {priceFormatter.format(booking.price)}
+                    Total: {formatRupiah(booking.price)}
                   </p>
                 </li>
               );
@@ -178,26 +135,9 @@ export default async function OrderHistoryPage() {
       )}
 
       {lineError ? (
-        <p
-          role="alert"
-          className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          Detail item pesanan gagal dimuat: {lineError.message}
-        </p>
+        <Alert variant="error">Detail item pesanan gagal dimuat: {lineError.message}</Alert>
       ) : orders.length === 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-6">
-          <p className="text-zinc-600">
-            {bookings.length > 0
-              ? "Belum ada pesanan produk atau sewa perlengkapan."
-              : "Kamu belum memiliki pesanan."}
-          </p>
-          <Link
-            href="/products"
-            className="mt-4 inline-block text-sm font-semibold text-emerald-800"
-          >
-            Jelajahi produk
-          </Link>
-        </div>
+        <EmptyState title={bookings.length > 0 ? "Belum ada pesanan produk atau sewa perlengkapan." : "Kamu belum memiliki pesanan."}><LinkButton href="/products" variant="secondary">Jelajahi produk</LinkButton></EmptyState>
       ) : (
         <ul className="space-y-5">
           {orders.map((order) => {
@@ -206,7 +146,7 @@ export default async function OrderHistoryPage() {
             return (
               <li
                 key={order.id}
-                className="rounded-lg border border-zinc-200 bg-white p-5 sm:p-6"
+                className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
@@ -214,18 +154,10 @@ export default async function OrderHistoryPage() {
                       Pesanan {order.id.slice(0, 8).toUpperCase()}
                     </p>
                     <p className="mt-1 text-sm text-zinc-600">
-                      {dateFormatter.format(new Date(order.created_at))}
+                      {formatTanggal(order.created_at, "datetime")}
                     </p>
                   </div>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      order.status === "paid"
-                        ? "bg-emerald-50 text-emerald-800"
-                        : "bg-amber-50 text-amber-800"
-                    }`}
-                  >
-                    {order.status === "paid" ? "Dibayar" : "Menunggu pembayaran"}
-                  </span>
+                  <Badge variant={order.status === "paid" ? "success" : "warning"}>{order.status === "paid" ? "Dibayar" : "Menunggu pembayaran"}</Badge>
                 </div>
 
                 <ul className="mt-5 space-y-3 border-t border-zinc-200 pt-4">
@@ -244,7 +176,7 @@ export default async function OrderHistoryPage() {
                           {item?.type === "rent" ? " (sewa)" : ""}
                         </span>
                         <span className="font-medium text-zinc-900">
-                          {priceFormatter.format(line.price * line.qty)}
+                          {formatRupiah(line.price * line.qty)}
                         </span>
                       </li>
                     );
@@ -260,17 +192,14 @@ export default async function OrderHistoryPage() {
                   <span className="text-sm font-medium text-zinc-700">
                     Total pesanan
                   </span>
-                  <span className="text-lg font-semibold text-emerald-900">
-                    {priceFormatter.format(order.total)}
+                  <span className="text-lg font-semibold text-padel-navy">
+                    {formatRupiah(order.total)}
                   </span>
                 </div>
                 {order.status === "pending" && (
-                  <Link
-                    href={`/checkout/success?order=${encodeURIComponent(order.id)}`}
-                    className="mt-4 inline-block rounded-full bg-padel-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-                  >
+                  <LinkButton href={`/checkout/success?order=${encodeURIComponent(order.id)}`} className="mt-4">
                     Lanjutkan pembayaran
-                  </Link>
+                  </LinkButton>
                 )}
               </li>
             );

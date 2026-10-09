@@ -3,6 +3,8 @@ import { connection } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { AddToCartButton } from "./add-to-cart-button";
 import { SiteHeader } from "./site-header";
+import { formatRupiah } from "@/lib/format";
+import { Alert, Badge, EmptyState, PageHeader } from "./ui";
 
 type CatalogItem = {
   id: string;
@@ -17,12 +19,6 @@ type CatalogItem = {
 type CatalogPageProps = {
   type: CatalogItem["type"];
 };
-
-const priceFormatter = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
 
 export async function CatalogPage({ type }: CatalogPageProps) {
   await connection();
@@ -43,36 +39,25 @@ export async function CatalogPage({ type }: CatalogPageProps) {
       <SiteHeader />
 
       <section className="py-10">
-        <p className="text-sm font-medium text-emerald-800">
-          {isRental ? "Sewa perlengkapan" : "Perlengkapan padel"}
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-          {isRental ? "Sewa raket padel" : "Belanja produk"}
-        </h1>
-        <p className="mt-3 max-w-2xl text-zinc-600">
-          {isRental
+        <PageHeader
+          eyebrow={isRental ? "Sewa perlengkapan" : "Perlengkapan padel"}
+          title={isRental ? "Sewa raket padel" : "Belanja produk"}
+          description={isRental
             ? "Pilih raket untuk bermain. Ketersediaan diperbarui sesuai status barang."
             : "Temukan raket, bola, dan perlengkapan padel untuk permainan berikutnya."}
-        </p>
+        />
       </section>
 
       {error ? (
-        <p
-          role="alert"
-          className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-        >
-          Katalog gagal dimuat: {error.message}
-        </p>
+        <Alert variant="error">Katalog gagal dimuat: {error.message}</Alert>
       ) : items.length === 0 ? (
-        <p className="rounded-md border border-zinc-200 p-6 text-zinc-600">
-          Belum ada item di katalog ini.
-        </p>
+        <EmptyState title="Belum ada item di katalog ini." />
       ) : (
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
             <li
               key={item.id}
-              className="overflow-hidden rounded-lg border border-zinc-200 bg-white"
+              className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm"
             >
               <div className="relative aspect-[4/3] bg-zinc-100">
                 {item.image_url ? (
@@ -93,20 +78,10 @@ export async function CatalogPage({ type }: CatalogPageProps) {
               <div className="space-y-3 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="font-semibold text-zinc-950">{item.name}</h2>
-                  {isRental && (
-                    <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
-                        item.status === "available"
-                          ? "bg-emerald-50 text-emerald-800"
-                          : "bg-zinc-100 text-zinc-700"
-                      }`}
-                    >
-                      {item.status === "available" ? "Tersedia" : "Disewa"}
-                    </span>
-                  )}
+                  {isRental && <Badge variant={item.status === "available" ? "success" : "neutral"} className="shrink-0">{item.status === "available" ? "Tersedia" : "Disewa"}</Badge>}
                 </div>
-                <p className="text-lg font-semibold text-emerald-900">
-                  {priceFormatter.format(item.price)}
+                <p className="text-lg font-semibold text-padel-navy">
+                  {formatRupiah(item.price)}
                   {isRental && (
                     <span className="ml-1 text-sm font-normal text-zinc-500">
                       / hari
@@ -114,9 +89,10 @@ export async function CatalogPage({ type }: CatalogPageProps) {
                   )}
                 </p>
                 {!isRental && (
-                  <p className="text-sm text-zinc-600">
-                    Stok: {item.stock ?? 0}
-                  </p>
+                  <div className="flex items-center gap-2 text-sm text-zinc-600">
+                    <span>Stok: {item.stock ?? 0}</span>
+                    {(item.stock ?? 0) <= 3 && <Badge variant="warning">Stok menipis</Badge>}
+                  </div>
                 )}
                 <AddToCartButton
                   item={item}

@@ -1,13 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useCart } from "./cart-context";
+import { formatRupiah } from "@/lib/format";
+import { Badge, Card, CheckoutSteps, EmptyState, LinkButton } from "./ui";
 
-const priceFormatter = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
 
 export function CartPage() {
   const { items, hydrated, persistenceError, setQuantity, removeItem } =
@@ -19,31 +15,23 @@ export function CartPage() {
   }
 
   return (
-    <section className="py-10">
-      <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">
-        Keranjang
-      </h1>
+    <section className="py-8">
+      <h1 className="mb-6 text-3xl font-semibold tracking-tight text-padel-navy">Keranjang</h1>
+      <CheckoutSteps current={1} />
       {persistenceError && (
         <p
           role="alert"
-          className="mt-5 rounded-md bg-amber-50 p-3 text-sm text-amber-900"
+          className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"
         >
           {persistenceError}
         </p>
       )}
       {items.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-zinc-200 p-6">
-          <p className="text-zinc-600">Keranjang masih kosong.</p>
-          <Link
-            href="/products"
-            className="mt-4 inline-block text-sm font-semibold text-emerald-800"
-          >
-            Jelajahi produk
-          </Link>
-        </div>
+        <EmptyState title="Keranjang masih kosong."><LinkButton href="/products" variant="secondary">Jelajahi produk</LinkButton></EmptyState>
       ) : (
         <>
-          <ul className="mt-8 divide-y divide-zinc-200 border-y border-zinc-200">
+          <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+          <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white px-5 shadow-sm">
             {items.map((item) => (
               <li
                 key={item.id}
@@ -54,8 +42,8 @@ export function CartPage() {
                   <p className="mt-1 text-sm text-zinc-600">
                     {item.type === "rent" ? "Sewa per hari" : "Produk"}
                   </p>
-                  <p className="mt-2 text-sm font-medium text-emerald-900">
-                    {priceFormatter.format(item.price)}
+                  <p className="mt-2 text-sm font-medium text-padel-navy">
+                    {formatRupiah(item.price)}
                     {item.type === "rent" ? " / hari" : ""}
                   </p>
                 </div>
@@ -71,7 +59,7 @@ export function CartPage() {
                         onChange={(event) =>
                           setQuantity(item.id, Number(event.target.value))
                         }
-                        className="w-20 rounded-md border border-zinc-300 px-2 py-1.5 text-zinc-950"
+                        className="h-10 w-20 rounded-lg border border-zinc-300 px-2 text-zinc-950 focus:border-padel-blue focus:outline-none focus:ring-2 focus:ring-padel-blue/20"
                       />
                     </label>
                   ) : (
@@ -80,7 +68,7 @@ export function CartPage() {
                   <button
                     type="button"
                     onClick={() => removeItem(item.id)}
-                    className="text-sm font-medium text-red-700"
+                    className="min-h-10 rounded-lg px-3 text-sm font-semibold text-red-700 hover:bg-red-50"
                   >
                     Hapus
                   </button>
@@ -88,20 +76,17 @@ export function CartPage() {
               </li>
             ))}
           </ul>
-          <div className="ml-auto mt-6 max-w-sm">
+          <Card className="h-fit p-5 lg:sticky lg:top-24">
+            <Badge variant="info">Ringkasan</Badge>
             <div className="flex justify-between gap-4 text-lg font-semibold">
               <span>Perkiraan total</span>
-              <span>{priceFormatter.format(total)}</span>
+              <span>{formatRupiah(total)}</span>
             </div>
             <p className="mt-2 text-xs text-zinc-500">
               Total akhir dihitung ulang saat checkout.
             </p>
-            <Link
-              href="/checkout"
-              className="mt-5 block rounded-md bg-emerald-800 px-4 py-3 text-center text-sm font-semibold text-white"
-            >
-              Lanjut ke checkout
-            </Link>
+            <LinkButton href="/checkout" className="mt-5 w-full">Lanjut ke checkout</LinkButton>
+          </Card>
           </div>
         </>
       )}
