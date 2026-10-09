@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart, type CartItem } from "./cart-context";
 import { Button, LinkButton } from "./ui";
 import { formatRupiah } from "@/lib/format";
@@ -19,13 +19,32 @@ export function AddToCartButton({
   const { items, hydrated, addItem } = useCart();
   const [message, setMessage] = useState<string | null>(null);
   const [rentalHours, setRentalHours] = useState(1);
+  const [rentalExpired, setRentalExpired] = useState(false);
   const inCart = items.some((entry) => entry.id === item.id);
   const atStockLimit =
     item.type === "sale" &&
     (items.find((entry) => entry.id === item.id)?.qty ?? 0) >= (item.stock ?? 0);
 
+  useEffect(() => {
+    if (item.type !== "rent" || item.status !== "rented" || !item.rented_until) {
+      setRentalExpired(false);
+      return;
+    }
+
+    const remaining = Date.parse(item.rented_until) - Date.now();
+    if (remaining <= 0) {
+      setRentalExpired(true);
+      return;
+    }
+
+    setRentalExpired(false);
+    const timeout = window.setTimeout(() => setRentalExpired(true), remaining);
+    return () => window.clearTimeout(timeout);
+  }, [item.id, item.rented_until, item.status, item.type]);
+
   function handleAdd() {
-    const error = addItem(item, rentalHours);
+    const availableItem = rentalExpired ? { ...item, status: "available" as const } : item;
+    const error = addItem(availableItem, rentalHours);
     setMessage(error ?? "Ditambahkan ke keranjang.");
   }
 
@@ -58,6 +77,7 @@ export function AddToCartButton({
         disabled={
           !hydrated ||
           disabled ||
+          (item.type === "rent" && item.status === "rented" && !rentalExpired) ||
           atStockLimit ||
           (item.type === "rent" && inCart)
         }

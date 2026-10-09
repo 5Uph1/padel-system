@@ -17,6 +17,7 @@ export type CartItem = {
   price: number;
   stock: number | null;
   status: "available" | "rented" | null;
+  rented_until?: string | null;
   image_url: string | null;
   qty: number;
 };

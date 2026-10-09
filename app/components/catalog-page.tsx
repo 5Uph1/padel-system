@@ -5,6 +5,7 @@ import { AddToCartButton } from "./add-to-cart-button";
 import { SiteHeader } from "./site-header";
 import { formatRupiah } from "@/lib/format";
 import { Alert, Badge, EmptyState, PageHeader } from "./ui";
+import { RentalStatusBadge } from "./rental-status-badge";
 
 type CatalogItem = {
   id: string;
@@ -13,6 +14,7 @@ type CatalogItem = {
   price: number;
   stock: number | null;
   status: "available" | "rented" | null;
+  rented_until: string | null;
   image_url: string | null;
 };
 
@@ -27,7 +29,7 @@ export async function CatalogPage({ type }: CatalogPageProps) {
   const [{ data, error }, { data: authData }] = await Promise.all([
     supabase
       .from("items")
-      .select("id, name, type, price, stock, status, image_url")
+      .select("id, name, type, price, stock, status, rented_until, image_url")
       .eq("type", type)
       .order("name"),
     supabase.auth.getUser(),
@@ -78,7 +80,7 @@ export async function CatalogPage({ type }: CatalogPageProps) {
               <div className="space-y-3 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="font-semibold text-zinc-950">{item.name}</h2>
-                  {isRental && <Badge variant={item.status === "available" ? "success" : "neutral"} className="shrink-0">{item.status === "available" ? "Tersedia" : "Disewa"}</Badge>}
+                  {isRental && <RentalStatusBadge status={item.status === "available" ? "available" : "rented"} rentedUntil={item.rented_until} />}
                 </div>
                 <p className="text-lg font-semibold text-padel-navy">
                   {formatRupiah(item.price)}
@@ -98,9 +100,7 @@ export async function CatalogPage({ type }: CatalogPageProps) {
                   item={item}
                   authenticated={Boolean(authData.user)}
                   disabled={
-                    isRental
-                      ? item.status !== "available"
-                      : (item.stock ?? 0) < 1
+                    !isRental && (item.stock ?? 0) < 1
                   }
                 />
               </div>
