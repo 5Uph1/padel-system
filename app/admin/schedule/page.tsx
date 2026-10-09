@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { formatTanggal } from "@/lib/format";
 import { Alert, Badge, EmptyState, PageHeader } from "@/app/components/ui";
+import { CancelBookingButton } from "./cancel-booking-button";
 
 type Court = {
   id: string;
@@ -11,10 +12,12 @@ type Court = {
 };
 
 type Booking = {
+  id: string;
   court_id: string;
   user_id: string;
   start_time: string;
   end_time: string;
+  payment_status: "pending" | "paid";
   profiles:
     | { email: string | null }
     | { email: string | null }[]
@@ -71,7 +74,7 @@ export default async function AdminSchedulePage({
       .single(),
     supabase
       .from("court_bookings")
-      .select("court_id, user_id, start_time, end_time, profiles(email)")
+      .select("id, court_id, user_id, start_time, end_time, payment_status, profiles(email)")
       .eq("booking_date", selectedDate)
       .eq("status", "booked"),
   ]);
@@ -100,6 +103,8 @@ export default async function AdminSchedulePage({
   return (
     <main className="py-10">
       <PageHeader eyebrow="Jadwal lapangan" title="Jadwal booking" description="Lihat ketersediaan setiap lapangan berdasarkan tanggal." />
+      {params.error === "cancel" && <div className="mb-5"><Alert variant="error">Booking lapangan tidak dapat dibatalkan. Muat ulang jadwal dan periksa statusnya.</Alert></div>}
+      {params.saved === "cancelled" && <div className="mb-5"><Alert variant="success">Booking lapangan berhasil dibatalkan.</Alert></div>}
       <div className="mb-5 flex flex-wrap gap-2"><Badge variant="success">Kosong</Badge><Badge variant="info">Sudah dibooking</Badge></div>
 
       <div className="mt-6 flex flex-wrap gap-2">
@@ -188,9 +193,15 @@ export default async function AdminSchedulePage({
                           {booking ? "Sudah dibooking" : "Kosong"}
                         </p>
                         {booking && (
-                          <p className="mt-2 break-all text-xs text-zinc-600">
-                            {email ?? `User ${booking.user_id.slice(0, 8)}`}
-                          </p>
+                          <>
+                            <p className="mt-2 break-all text-xs text-zinc-600">
+                              {email ?? `User ${booking.user_id.slice(0, 8)}`}
+                            </p>
+                            <Badge variant={booking.payment_status === "paid" ? "success" : "warning"}>
+                              {booking.payment_status === "paid" ? "Sudah dibayar" : "Menunggu pembayaran"}
+                            </Badge>
+                            <CancelBookingButton bookingId={booking.id} date={selectedDate} />
+                          </>
                         )}
                       </li>
                     );
