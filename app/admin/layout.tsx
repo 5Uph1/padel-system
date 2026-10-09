@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { logout } from "@/app/auth/actions";
 import { createClient } from "@/utils/supabase/server";
+import { AdminNav } from "./admin-nav";
 
 export const instant = false;
 
@@ -26,38 +26,24 @@ export default async function AdminLayout({
   if (error || profile?.role !== "admin") redirect("/products");
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex-1 px-6 py-8 sm:px-8">
-      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 pb-5">
-        <Link href="/admin" className="text-lg font-semibold text-emerald-900">
-          Padel Shop Admin
-        </Link>
-        <nav className="flex flex-wrap gap-5 text-sm">
-          <Link href="/admin/stock" className="text-zinc-700 hover:text-emerald-800">
-            Stok
-          </Link>
-          <Link href="/admin/rentals" className="text-zinc-700 hover:text-emerald-800">
-            Sewa
-          </Link>
-          <Link href="/admin/courts" className="text-zinc-700 hover:text-emerald-800">
-            Lapangan
-          </Link>
-          <Link href="/admin/schedule" className="text-zinc-700 hover:text-emerald-800">
-            Jadwal
-          </Link>
-          <Link href="/admin/orders" className="text-zinc-700 hover:text-emerald-800">
-            Pesanan
-          </Link>
-          <Link href="/products" className="text-zinc-700 hover:text-emerald-800">
-            Lihat toko
-          </Link>
-          <form action={logout}>
-            <button type="submit" className="font-medium text-padel-blue">
-              Keluar
-            </button>
-          </form>
-        </nav>
+    <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-8">
+      <header className="mb-6 flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white px-5 py-4 shadow-sm">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-padel-blue">Padel Shop</p>
+          <h1 className="mt-1 text-lg font-semibold text-padel-navy">Panel Admin</h1>
+        </div>
+        <form action={logout}>
+          <button type="submit" className="min-h-10 rounded-xl border border-zinc-300 px-4 py-2 text-sm font-semibold text-padel-navy hover:bg-zinc-50">
+            Keluar
+          </button>
+        </form>
       </header>
-      {children}
+      <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+        <aside className="h-fit rounded-xl border border-zinc-200 bg-white p-3 shadow-sm lg:sticky lg:top-6">
+          <AdminNav />
+        </aside>
+        <div className="min-w-0">{children}</div>
+      </div>
     </div>
   );
 }

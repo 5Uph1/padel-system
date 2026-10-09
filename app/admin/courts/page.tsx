@@ -5,6 +5,7 @@ import {
   updateCourt,
   updateCourtSettings,
 } from "./actions";
+import { Alert, Badge, Card, EmptyState, PageHeader, Button } from "@/app/components/ui";
 
 type Court = {
   id: string;
@@ -50,30 +51,25 @@ export default async function AdminCourtsPage({
 
   return (
     <main className="py-10">
-      <p className="text-sm font-semibold text-padel-blue">Pengaturan lapangan</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-padel-navy">
-        Kelola lapangan
-      </h1>
+      <PageHeader eyebrow="Pengaturan lapangan" title="Kelola lapangan" description="Atur jam operasional dan informasi lapangan." />
       {errorMessage && (
-        <p role="alert" className="mt-5 rounded-lg bg-red-50 p-4 text-sm text-red-800">
-          {errorMessage}
-        </p>
+        <Alert variant="error">{errorMessage}</Alert>
       )}
       {params.saved && (
-        <p className="mt-5 rounded-lg bg-lime-100 p-4 text-sm text-padel-navy">
+        <Alert variant="success">
           Perubahan berhasil disimpan.
-        </p>
+        </Alert>
       )}
       {courtError || settingsError ? (
-        <p role="alert" className="mt-5 rounded-lg bg-red-50 p-4 text-sm text-red-800">
+        <Alert variant="error">
           Pengaturan gagal dimuat: {[courtError, settingsError]
             .filter((error) => error !== null)
             .map((error) => error.message)
             .join(" ")}
-        </p>
+        </Alert>
       ) : (
         <>
-          <section className="mt-8 rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6">
+          <Card className="mt-6 p-5 sm:p-6">
             <h2 className="text-lg font-semibold text-padel-navy">
               Jam operasional
             </h2>
@@ -89,7 +85,7 @@ export default async function AdminCourtsPage({
                   step={3600}
                   required
                   defaultValue={currentSettings?.open_time.slice(0, 5) ?? "08:00"}
-                  className="mt-2 block rounded-lg border border-zinc-300 px-3 py-2.5"
+                  className="mt-2 block min-h-11 rounded-lg border border-zinc-300 px-3 py-2.5 focus:border-padel-blue focus:outline-none focus:ring-2 focus:ring-padel-blue/20"
                 />
               </label>
               <label className="text-sm font-medium text-zinc-700">
@@ -100,16 +96,16 @@ export default async function AdminCourtsPage({
                   step={3600}
                   required
                   defaultValue={currentSettings?.close_time.slice(0, 5) ?? "22:00"}
-                  className="mt-2 block rounded-lg border border-zinc-300 px-3 py-2.5"
+                  className="mt-2 block min-h-11 rounded-lg border border-zinc-300 px-3 py-2.5 focus:border-padel-blue focus:outline-none focus:ring-2 focus:ring-padel-blue/20"
                 />
               </label>
-              <button className="rounded-full bg-padel-blue px-5 py-2.5 text-sm font-semibold text-white">
+              <Button type="submit">
                 Simpan jam
-              </button>
+              </Button>
             </form>
-          </section>
+          </Card>
 
-          <section className="mt-8 rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6">
+          <Card className="mt-6 p-5 sm:p-6">
             <h2 className="text-lg font-semibold text-padel-navy">
               Tambah lapangan
             </h2>
@@ -121,7 +117,7 @@ export default async function AdminCourtsPage({
                   maxLength={80}
                   required
                   placeholder="Court 1"
-                  className="mt-2 block w-full rounded-lg border border-zinc-300 px-3 py-2.5"
+                  className="mt-2 block min-h-11 w-full rounded-lg border border-zinc-300 px-3 py-2.5 focus:border-padel-blue focus:outline-none focus:ring-2 focus:ring-padel-blue/20"
                 />
               </label>
               <label className="text-sm font-medium text-zinc-700">
@@ -133,36 +129,32 @@ export default async function AdminCourtsPage({
                   max={100000000}
                   step="1000"
                   required
-                  className="mt-2 block w-full rounded-lg border border-zinc-300 px-3 py-2.5"
+                  className="mt-2 block min-h-11 w-full rounded-lg border border-zinc-300 px-3 py-2.5 focus:border-padel-blue focus:outline-none focus:ring-2 focus:ring-padel-blue/20"
                 />
               </label>
-              <button className="rounded-full bg-padel-lime px-5 py-2.5 text-sm font-bold text-padel-navy">
+              <Button type="submit" variant="secondary" className="border-padel-lime bg-padel-lime text-padel-navy">
                 Tambah lapangan
-              </button>
+              </Button>
             </form>
-          </section>
+          </Card>
 
           <section className="mt-8">
             <h2 className="text-lg font-semibold text-padel-navy">
               Daftar lapangan
             </h2>
             {courts.length === 0 ? (
-              <p className="mt-4 rounded-xl border border-zinc-200 bg-white p-5 text-sm text-zinc-600">
-                Belum ada lapangan.
-              </p>
+              <EmptyState title="Belum ada lapangan." />
             ) : (
               <ul className="mt-4 space-y-4">
                 {courts.map((court) => (
                   <li
                     key={court.id}
-                    className="rounded-2xl border border-zinc-200 bg-white p-5"
+                    className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <h3 className="font-semibold text-padel-navy">{court.name}</h3>
-                        <p className="mt-1 text-sm text-zinc-600">
-                          {court.is_active ? "Aktif dan tampil untuk booking" : "Nonaktif"}
-                        </p>
+                        <div className="mt-2"><Badge variant={court.is_active ? "success" : "neutral"}>{court.is_active ? "Aktif" : "Nonaktif"}</Badge></div>
                       </div>
                       <form action={toggleCourt}>
                         <input type="hidden" name="id" value={court.id} />
@@ -171,7 +163,7 @@ export default async function AdminCourtsPage({
                           name="active"
                           value={String(!court.is_active)}
                         />
-                        <button className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-semibold text-padel-blue">
+                        <button className="min-h-10 rounded-xl border border-zinc-300 px-4 py-2 text-sm font-semibold text-padel-blue hover:bg-zinc-50">
                           {court.is_active ? "Nonaktifkan" : "Aktifkan"}
                         </button>
                       </form>
@@ -188,7 +180,7 @@ export default async function AdminCourtsPage({
                           maxLength={80}
                           required
                           defaultValue={court.name}
-                          className="mt-2 block w-full rounded-lg border border-zinc-300 px-3 py-2.5"
+                          className="mt-2 block min-h-11 w-full rounded-lg border border-zinc-300 px-3 py-2.5 focus:border-padel-blue focus:outline-none focus:ring-2 focus:ring-padel-blue/20"
                         />
                       </label>
                       <label className="text-sm font-medium text-zinc-700">
@@ -201,12 +193,12 @@ export default async function AdminCourtsPage({
                           step="1000"
                           required
                           defaultValue={court.price_per_hour}
-                          className="mt-2 block w-full rounded-lg border border-zinc-300 px-3 py-2.5"
+                          className="mt-2 block min-h-11 w-full rounded-lg border border-zinc-300 px-3 py-2.5 focus:border-padel-blue focus:outline-none focus:ring-2 focus:ring-padel-blue/20"
                         />
                       </label>
-                      <button className="rounded-full bg-padel-blue px-5 py-2.5 text-sm font-semibold text-white">
+                      <Button type="submit">
                         Simpan
-                      </button>
+                      </Button>
                     </form>
                   </li>
                 ))}

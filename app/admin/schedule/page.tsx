@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { formatTanggal } from "@/lib/format";
+import { Alert, Badge, EmptyState, PageHeader } from "@/app/components/ui";
 
 type Court = {
   id: string;
@@ -34,13 +36,7 @@ function jakartaDateString(date: Date) {
 }
 
 function formatDate(date: string) {
-  return new Intl.DateTimeFormat("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(`${date}T00:00:00Z`));
+  return formatTanggal(`${date}T00:00:00Z`, "long");
 }
 
 export const instant = false;
@@ -103,13 +99,8 @@ export default async function AdminSchedulePage({
 
   return (
     <main className="py-10">
-      <p className="text-sm font-semibold text-padel-blue">Jadwal lapangan</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-padel-navy">
-        Jadwal booking
-      </h1>
-      <p className="mt-3 text-sm text-zinc-600">
-        Slot hijau kosong; slot biru telah dibooking.
-      </p>
+      <PageHeader eyebrow="Jadwal lapangan" title="Jadwal booking" description="Lihat ketersediaan setiap lapangan berdasarkan tanggal." />
+      <div className="mb-5 flex flex-wrap gap-2"><Badge variant="success">Kosong</Badge><Badge variant="info">Sudah dibooking</Badge></div>
 
       <div className="mt-6 flex flex-wrap gap-2">
         {dates.map((date) => (
@@ -133,25 +124,19 @@ export default async function AdminSchedulePage({
       </p>
 
       {errors.length > 0 ? (
-        <p role="alert" className="mt-5 rounded-lg bg-red-50 p-4 text-sm text-red-800">
+        <Alert variant="error">
           Jadwal gagal dimuat: {errors.map((error) => error.message).join(" ")}
-        </p>
+        </Alert>
       ) : courts.length === 0 ? (
-        <p className="mt-5 rounded-xl border border-zinc-200 bg-white p-5 text-sm text-zinc-600">
-          Belum ada lapangan. Tambahkan lapangan di{" "}
-          <Link href="/admin/courts" className="font-semibold text-padel-blue">
-            pengaturan lapangan
-          </Link>
-          .
-        </p>
+        <EmptyState title="Belum ada lapangan." description="Tambahkan lapangan melalui pengaturan lapangan."><Link href="/admin/courts" className="font-semibold text-padel-blue">Pengaturan lapangan</Link></EmptyState>
       ) : !settings || slots.length === 0 ? (
-        <p className="mt-5 rounded-lg bg-amber-50 p-4 text-sm text-amber-900">
+        <Alert variant="info">
           Atur jam operasional pada jam penuh di{" "}
           <Link href="/admin/courts" className="font-semibold underline">
             pengaturan lapangan
           </Link>
           .
-        </p>
+        </Alert>
       ) : (
         <div className="mt-5 space-y-5">
           {courts.map((court) => {
@@ -168,19 +153,11 @@ export default async function AdminSchedulePage({
             return (
               <section
                 key={court.id}
-                className="overflow-hidden rounded-2xl border border-zinc-200 bg-white"
+                className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm"
               >
                 <header className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 px-5 py-4">
                   <h2 className="font-semibold text-padel-navy">{court.name}</h2>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      court.is_active
-                        ? "bg-lime-100 text-padel-navy"
-                        : "bg-zinc-100 text-zinc-600"
-                    }`}
-                  >
-                    {court.is_active ? "Aktif" : "Nonaktif"}
-                  </span>
+                  <Badge variant={court.is_active ? "success" : "neutral"}>{court.is_active ? "Aktif" : "Nonaktif"}</Badge>
                 </header>
                 <ul className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
                   {slots.map((slot) => {
@@ -196,7 +173,7 @@ export default async function AdminSchedulePage({
                         key={slot}
                         className={`rounded-xl border p-4 ${
                           booking
-                            ? "border-padel-blue bg-blue-50"
+                          ? "border-padel-blue bg-blue-50"
                             : "border-lime-200 bg-lime-50"
                         }`}
                       >
@@ -205,7 +182,7 @@ export default async function AdminSchedulePage({
                         </p>
                         <p
                           className={`mt-1 text-sm font-medium ${
-                            booking ? "text-padel-blue" : "text-emerald-800"
+                            booking ? "text-padel-blue" : "text-green-800"
                           }`}
                         >
                           {booking ? "Sudah dibooking" : "Kosong"}

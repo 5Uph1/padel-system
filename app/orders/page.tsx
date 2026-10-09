@@ -28,6 +28,7 @@ type CourtBooking = {
   end_time: string;
   price: number;
   status: "booked" | "cancelled";
+  payment_status: "pending" | "paid";
   courts: { name: string } | { name: string }[] | null;
 };
 
@@ -52,7 +53,7 @@ export default async function OrderHistoryPage() {
       .order("created_at", { ascending: false }),
     supabase
       .from("court_bookings")
-      .select("id, booking_date, start_time, end_time, price, status, courts(name)")
+      .select("id, booking_date, start_time, end_time, price, status, payment_status, courts(name)")
       .eq("user_id", user.id)
       .order("booking_date", { ascending: false })
       .order("start_time", { ascending: false }),
@@ -122,11 +123,14 @@ export default async function OrderHistoryPage() {
                         {booking.end_time.slice(0, 5)}
                       </p>
                     </div>
-                    <Badge variant={booking.status === "booked" ? "success" : "neutral"}>{booking.status === "booked" ? "Dibooking" : "Dibatalkan"}</Badge>
+                    <Badge variant={booking.payment_status === "pending" ? "warning" : booking.status === "booked" ? "success" : "neutral"}>{booking.payment_status === "pending" ? "Menunggu pembayaran" : booking.status === "booked" ? "Dibooking" : "Dibatalkan"}</Badge>
                   </div>
                   <p className="mt-4 border-t border-zinc-200 pt-4 text-sm font-semibold text-padel-navy">
                     Total: {formatRupiah(booking.price)}
                   </p>
+                  {booking.payment_status === "pending" && (
+                    <LinkButton href={`/rentals/courts/confirmation?booking=${encodeURIComponent(booking.id)}`} className="mt-4">Lanjutkan pembayaran</LinkButton>
+                  )}
                 </li>
               );
             })}

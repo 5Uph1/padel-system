@@ -21,9 +21,9 @@ export default function Home() {
             berikutnya.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
-            <LinkButton href="/products" variant="secondary" className="border-padel-lime bg-padel-lime font-bold text-padel-navy hover:bg-lime-300">Lihat produk</LinkButton>
-            <LinkButton href="/rentals" variant="secondary" className="border-white/30 bg-transparent text-white hover:bg-white/10">Sewa raket</LinkButton>
-            <LinkButton href="/rentals/courts" variant="secondary" className="border-white/30 bg-transparent text-white hover:bg-white/10">Sewa lapangan</LinkButton>
+            <LinkButton href="/products" variant="secondary" className="!border-padel-lime !bg-padel-lime font-bold !text-padel-navy hover:!bg-lime-300">Lihat produk</LinkButton>
+            <LinkButton href="/rentals" variant="secondary" className="!border-white/30 !bg-transparent !text-white hover:!bg-white/10">Sewa raket</LinkButton>
+            <LinkButton href="/rentals/courts" variant="secondary" className="!border-white/30 !bg-transparent !text-white hover:!bg-white/10">Sewa lapangan</LinkButton>
           </div>
         </div>
       </section>

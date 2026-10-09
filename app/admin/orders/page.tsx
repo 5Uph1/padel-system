@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { formatRupiah, formatTanggal } from "@/lib/format";
+import { Alert, Badge, Card, EmptyState, PageHeader } from "@/app/components/ui";
 
 type Order = {
   id: string;
@@ -33,6 +34,10 @@ export default async function AdminOrdersPage() {
     .select("id, user_id, total, status, created_at")
     .order("created_at", { ascending: false });
   const orders = (orderData ?? []) as Order[];
+  const pendingOrders = orders.filter((order) => order.status === "pending").length;
+  const totalRevenue = orders
+    .filter((order) => order.status === "paid")
+    .reduce((total, order) => total + order.total, 0);
   const userIds = [...new Set(orders.map((order) => order.user_id))];
   const orderIds = orders.map((order) => order.id);
 
@@ -60,29 +65,29 @@ export default async function AdminOrdersPage() {
   }
 
   return (
-    <main className="py-10">
-      <p className="text-sm font-medium text-emerald-800">Transaksi</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-        Pesanan
-      </h1>
+    <main className="py-5">
+      <PageHeader eyebrow="Transaksi" title="Pesanan" description="Ringkasan dan detail pesanan pelanggan." />
+      <section aria-label="Ringkasan pesanan" className="mb-6 grid gap-4 sm:grid-cols-3">
+        <Card className="p-5"><p className="text-sm text-zinc-600">Total pesanan</p><p className="mt-2 text-2xl font-semibold text-padel-navy">{orders.length}</p></Card>
+        <Card className="p-5"><p className="text-sm text-zinc-600">Menunggu pembayaran</p><p className="mt-2 text-2xl font-semibold text-padel-navy">{pendingOrders}</p></Card>
+        <Card className="p-5"><p className="text-sm text-zinc-600">Total pendapatan</p><p className="mt-2 text-2xl font-semibold text-padel-navy">{formatRupiah(totalRevenue)}</p></Card>
+      </section>
       {error || profileError || lineError ? (
-        <p role="alert" className="mt-6 rounded-md bg-red-50 p-4 text-sm text-red-800">
+        <Alert variant="error">
           Pesanan gagal dimuat:{" "}
           {[error, profileError, lineError]
             .filter((entry) => entry !== null)
             .map((entry) => entry.message)
             .join(" ")}
-        </p>
+        </Alert>
       ) : orders.length === 0 ? (
-        <p className="mt-6 rounded-md border border-zinc-200 p-6 text-zinc-600">
-          Belum ada pesanan.
-        </p>
+        <EmptyState title="Belum ada pesanan." />
       ) : (
         <ul className="mt-6 space-y-5">
           {orders.map((order) => (
             <li
               key={order.id}
-              className="rounded-lg border border-zinc-200 p-5"
+              className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
             >
               <div className="flex flex-wrap justify-between gap-4">
                 <div>
@@ -97,18 +102,12 @@ export default async function AdminOrdersPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-emerald-900">
+                  <p className="font-semibold text-padel-navy">
                     {formatRupiah(order.total)}
                   </p>
-                  <span
-                    className={`mt-2 inline-block rounded-full px-2.5 py-1 text-xs font-medium ${
-                      order.status === "paid"
-                        ? "bg-emerald-50 text-emerald-800"
-                        : "bg-amber-50 text-amber-800"
-                    }`}
-                  >
+                  <Badge variant={order.status === "paid" ? "success" : "warning"} className="mt-2">
                     {order.status === "paid" ? "Dibayar" : "Menunggu pembayaran"}
-                  </span>
+                  </Badge>
                 </div>
               </div>
               <ul className="mt-4 space-y-2 border-t border-zinc-200 pt-4">

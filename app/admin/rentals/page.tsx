@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { formatRupiah } from "@/lib/format";
+import { Alert, Badge, Card, EmptyState, PageHeader } from "@/app/components/ui";
 
 type RentalItem = {
   id: string;
@@ -21,20 +22,15 @@ export default async function AdminRentalsPage() {
   const items = (data ?? []) as RentalItem[];
 
   return (
-    <main className="py-10">
-      <p className="text-sm font-medium text-emerald-800">Inventaris</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-        Status perlengkapan sewa
-      </h1>
+    <main className="py-5">
+      <PageHeader eyebrow="Inventaris" title="Status perlengkapan sewa" description="Pantau status raket dan perlengkapan yang disewakan." />
       {error ? (
-        <p role="alert" className="mt-6 rounded-md bg-red-50 p-4 text-sm text-red-800">
-          Status sewa gagal dimuat: {error.message}
-        </p>
+        <Alert variant="error">Status sewa gagal dimuat: {error.message}</Alert>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+        <Card className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-50 text-zinc-600">
-              <tr>
+            <thead className="sticky top-0 bg-zinc-50 text-zinc-600">
+              <tr className="border-b border-zinc-200">
                 <th className="px-4 py-3 font-medium">Item</th>
                 <th className="px-4 py-3 font-medium">Harga / hari</th>
                 <th className="px-4 py-3 font-medium">Status</th>
@@ -42,34 +38,26 @@ export default async function AdminRentalsPage() {
             </thead>
             <tbody className="divide-y divide-zinc-200">
               {items.map((item) => (
-                <tr key={item.id}>
+                <tr key={item.id} className="odd:bg-white even:bg-zinc-50/70 hover:bg-blue-50/60">
                   <td className="px-4 py-3 font-medium text-zinc-950">{item.name}</td>
                   <td className="px-4 py-3 text-zinc-700">
                     {formatRupiah(item.price)}
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                        item.status === "available"
-                          ? "bg-emerald-50 text-emerald-800"
-                          : "bg-zinc-100 text-zinc-700"
-                      }`}
-                    >
-                      {item.status === "available" ? "Tersedia" : "Disewa"}
-                    </span>
+                    <Badge variant={item.status === "available" ? "success" : "neutral"}>{item.status === "available" ? "Tersedia" : "Disewa"}</Badge>
                   </td>
                 </tr>
               ))}
               {items.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-6 text-zinc-600">
-                    Belum ada item sewa.
+                    <td colSpan={3} className="px-4 py-6">
+                    <EmptyState title="Belum ada item sewa." />
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
     </main>
   );

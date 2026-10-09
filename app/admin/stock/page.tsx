@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { formatRupiah } from "@/lib/format";
+import { Alert, Badge, Card, EmptyState, PageHeader } from "@/app/components/ui";
 
 type StockItem = {
   id: string;
@@ -21,20 +22,15 @@ export default async function AdminStockPage() {
   const items = (data ?? []) as StockItem[];
 
   return (
-    <main className="py-10">
-      <p className="text-sm font-medium text-emerald-800">Inventaris</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-        Stok produk
-      </h1>
+    <main className="py-5">
+      <PageHeader eyebrow="Inventaris" title="Stok produk" description="Pantau ketersediaan produk di toko." />
       {error ? (
-        <p role="alert" className="mt-6 rounded-md bg-red-50 p-4 text-sm text-red-800">
-          Stok gagal dimuat: {error.message}
-        </p>
+        <Alert variant="error">Stok gagal dimuat: {error.message}</Alert>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+        <Card className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-50 text-zinc-600">
-              <tr>
+            <thead className="sticky top-0 bg-zinc-50 text-zinc-600">
+              <tr className="border-b border-zinc-200">
                 <th className="px-4 py-3 font-medium">Produk</th>
                 <th className="px-4 py-3 font-medium">Harga</th>
                 <th className="px-4 py-3 font-medium">Stok</th>
@@ -42,24 +38,24 @@ export default async function AdminStockPage() {
             </thead>
             <tbody className="divide-y divide-zinc-200">
               {items.map((item) => (
-                <tr key={item.id}>
+                <tr key={item.id} className="odd:bg-white even:bg-zinc-50/70 hover:bg-blue-50/60">
                   <td className="px-4 py-3 font-medium text-zinc-950">{item.name}</td>
                   <td className="px-4 py-3 text-zinc-700">
                     {formatRupiah(item.price)}
                   </td>
-                  <td className="px-4 py-3 text-zinc-700">{item.stock}</td>
+                  <td className="px-4 py-3"><Badge variant={item.stock <= 3 ? "warning" : "neutral"}>{item.stock} unit{item.stock <= 3 ? " · Menipis" : ""}</Badge></td>
                 </tr>
               ))}
               {items.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-6 text-zinc-600">
-                    Belum ada produk jual.
+                    <td colSpan={3} className="px-4 py-6">
+                    <EmptyState title="Belum ada produk jual." />
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
     </main>
   );

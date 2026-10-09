@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { SiteHeader } from "@/app/components/site-header";
 import { createClient } from "@/utils/supabase/server";
 import { bookCourt } from "./actions";
+import { BookingSubmitButton } from "./booking-submit-button";
 import { formatRupiah, formatTanggal } from "@/lib/format";
 import { Alert, Badge, EmptyState, PageHeader } from "@/app/components/ui";
 
@@ -249,12 +250,7 @@ export default async function CourtBookingPage({
                                   name="startTime"
                                   value={slot}
                                 />
-                                <button
-                                  type="submit"
-                                  className="w-full rounded-full bg-padel-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-                                >
-                                  Bayar &amp; booking
-                                </button>
+                                <BookingSubmitButton />
                               </form>
                             ) : (
                               <Link

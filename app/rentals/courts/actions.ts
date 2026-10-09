@@ -52,3 +52,32 @@ export async function bookCourt(formData: FormData) {
   revalidatePath("/orders");
   redirect(`/rentals/courts/confirmation?booking=${encodeURIComponent(bookingId)}`);
 }
+
+export async function payCourtBooking(formData: FormData) {
+  const bookingId = formData.get("bookingId");
+  if (typeof bookingId !== "string") redirect("/rentals/courts");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login?next=%2Frentals%2Fcourts");
+
+  const { error } = await supabase.rpc("pay_court_booking", {
+    p_booking_id: bookingId,
+  });
+
+  if (error) {
+    redirect(
+      `/rentals/courts/confirmation?booking=${encodeURIComponent(bookingId)}&error=payment`,
+    );
+  }
+
+  revalidatePath("/rentals/courts");
+  revalidatePath("/admin/schedule");
+  revalidatePath("/orders");
+  redirect(
+    `/rentals/courts/confirmation?booking=${encodeURIComponent(bookingId)}&paid=1`,
+  );
+}
